@@ -9,9 +9,12 @@ use Twig\Error\SyntaxError;
 $twig = getTwig();
 $manager = getMongoDbManager();
 
-// @todo implementez la récupération des données dans la variable $list
-// petite aide : https://github.com/VSG24/mongodb-php-examples
-$list = [['name' => 'test']];
+// La collection a été nommée "tp" lors de votre mongoimport
+$collection = $manager->tp;
+
+// Récupération de tous les documents de la collection
+// find() retourne un curseur que l'on convertit ici en tableau
+$list = $collection->find([])->toArray();
 
 // render template
 try {
@@ -19,6 +22,3 @@ try {
 } catch (LoaderError|RuntimeError|SyntaxError $e) {
     echo $e->getMessage();
 }
-
-
-

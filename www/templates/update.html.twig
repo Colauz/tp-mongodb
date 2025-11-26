@@ -1,20 +1,39 @@
 {% extends "base.html.twig" %}
 
-{% block title %}Modification d'un livre{% endblock %}
+{% block title %}Modifier le manuscrit{% endblock %}
+
 {% block content %}
-<p>&larr;&nbsp;<a href="/index.php">Retourner à la liste</a></p>
-<form action="/update.php" method="post">
-        <input type="hidden" id="id" name="id" value="{{ entity._id }}">
+    <div class="container">
+        <h1>Modifier le manuscrit</h1>
 
-        <label for="title">Titre :</label>
-        <input type="text" id="title" name="title" value="récupérez la valeur depuis mongodb" size="100">
+        {% if message %}
+            <div class="alert alert-danger">{{ message }}</div>
+        {% endif %}
 
-        <label for="author">Auteur :</label>
-        <input type="text" id="author" name="author" size="50" value="récupérez la valeur depuis mongodb">
+        {# L'action pointe vers la même page avec l'ID en paramètre #}
+        <form method="post" action="edit.php?id={{ document._id }}">
+            <div class="mb-3">
+                <label for="cote" class="form-label">Cote</label>
+                <input type="text" class="form-control" id="cote" name="cote" value="{{ document.cote }}" required>
+            </div>
 
-        <label for="author">Siècle :</label>
-        <input type="number" id="century" name="century" value="123456879">
+            <div class="mb-3">
+                <label for="titre" class="form-label">Titre</label>
+                <input type="text" class="form-control" id="titre" name="titre" value="{{ document.titre }}" required>
+            </div>
 
-        <button type="submit">Enregistrer</button>
-</form>
+            <div class="mb-3">
+                <label for="auteur" class="form-label">Auteur</label>
+                <input type="text" class="form-control" id="auteur" name="auteur" value="{{ document.auteur }}">
+            </div>
+
+            <div class="mb-3">
+                <label for="siecle" class="form-label">Siècle</label>
+                <input type="text" class="form-control" id="siecle" name="siecle" value="{{ document.siecle }}">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+            <a href="index.php" class="btn btn-secondary">Annuler</a>
+        </form>
+    </div>
 {% endblock %}

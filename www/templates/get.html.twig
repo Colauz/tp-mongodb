@@ -1,7 +1,33 @@
 {% extends "base.html.twig" %}
 
-{% block title %}Document ""{% endblock %}
+{% block title %}Détail du manuscrit{% endblock %}
+
 {% block content %}
-    <p>&larr;&nbsp;<a href="/index.php">Retourner à la liste</a></p>
-    affichez le contenu d'un document de la liste
+    <div class="container">
+        {% if document %}
+            <h1>Détail du document</h1>
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ document.titre|default('Sans titre') }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ document.auteur|default('Auteur inconnu') }}</h6>
+
+                    <p class="card-text">
+                        <strong>Cote :</strong> {{ document.cote }}<br>
+                        <strong>Siècle :</strong> {{ document.siecle|default('Non renseigné') }}<br>
+                        {# Ajoutez ici d'autres champs si vous le souhaitez #}
+                    </p>
+
+                    <hr>
+                    <a href="index.php" class="btn btn-secondary">Retour à la liste</a>
+                    <a href="edit.php?id={{ document._id }}" class="btn btn-primary">Modifier</a>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-danger">
+                Ce document n'existe pas ou l'ID est incorrect.
+            </div>
+            <a href="index.php">Retour</a>
+        {% endif %}
+    </div>
 {% endblock %}

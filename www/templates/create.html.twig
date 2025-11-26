@@ -1,18 +1,38 @@
 {% extends "base.html.twig" %}
 
-{% block title %}Création d'un livre{% endblock %}
+{% block title %}Ajouter un manuscrit{% endblock %}
+
 {% block content %}
-<p>&larr;&nbsp;<a href="/index.php">Retourner à la liste</a></p>
-<form action="/create.php" method="post">
-        <label for="title">Titre :</label>
-        <input type="text" id="title" name="title" size="100">
+    <div class="container">
+        <h1>Ajouter un nouveau manuscrit</h1>
 
-        <label for="author">Auteur :</label>
-        <input type="text" id="author" name="author" size="50">
+        {% if message %}
+            <div class="alert alert-danger">{{ message }}</div>
+        {% endif %}
 
-        <label for="century">Siècle :</label>
-        <input type="number" id="century" name="century">
+        <form method="post" action="create.php">
+            <div class="mb-3">
+                <label for="cote" class="form-label">Cote</label>
+                <input type="text" class="form-control" id="cote" name="cote" required>
+            </div>
 
-        <button type="submit">Ajouter</button>
-</form>
+            <div class="mb-3">
+                <label for="titre" class="form-label">Titre</label>
+                <input type="text" class="form-control" id="titre" name="titre" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="auteur" class="form-label">Auteur</label>
+                <input type="text" class="form-control" id="auteur" name="auteur">
+            </div>
+
+            <div class="mb-3">
+                <label for="siecle" class="form-label">Siècle</label>
+                <input type="text" class="form-control" id="siecle" name="siecle">
+            </div>
+
+            <button type="submit" class="btn btn-success">Enregistrer</button>
+            <a href="index.php" class="btn btn-secondary">Annuler</a>
+        </form>
+    </div>
 {% endblock %}
