@@ -25,3 +25,19 @@ function getMongoDbManager(): Database
     return $client->selectDatabase($_ENV['MDB_DB']);
 }
 
+function getRedisClient() {
+    // Si le cache est désactivé, on renvoie null
+    if (empty($_ENV['REDIS_ENABLE']) || $_ENV['REDIS_ENABLE'] == 'false') {
+        return null;
+    }
+
+    try {
+        return new Predis\Client([
+            'scheme' => 'tcp',
+            'host'   => $_ENV['REDIS_HOST'],
+            'port'   => $_ENV['REDIS_PORT'],
+        ]);
+    } catch (Exception $e) {
+        return null;
+    }
+}
