@@ -8,12 +8,12 @@ use Twig\Error\SyntaxError;
 
 $twig = getTwig();
 $manager = getMongoDbManager();
+$redis = getRedisClient();
+$es = getElasticSearchClient(); // <--- On récupère le client ElasticSearch
 
 $message = null;
 
-// Si le formulaire a été soumis (méthode POST)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // On récupère les données du formulaire
     $data = [
         'cote' => $_POST['cote'] ?? '',
         'titre' => $_POST['titre'] ?? '',
@@ -21,13 +21,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'siecle' => $_POST['siecle'] ?? ''
     ];
 
-    // Insertion dans la collection 'tp'
     try {
+        // Insertion MongoDB
         $result = $manager->tp->insertOne($data);
 
-        // Si l'insertion a marché (on a un ID inséré), on redirige vers l'accueil
         if ($result->getInsertedCount() > 0) {
-            header('Location: index.php');
+
+            // --- A. SYNC ELASTICSEARCH ---
+            // On indexe immédiatement le nouveau livre
+            if ($es) {
+                $es->index([
+                    'index' => 'bibliotheque',
+                    'id'    => (string)$result->getInsertedId(), // On récupère l'ID créé par Mongo
+                    'body'  => $data
+                ]);
+            }
+
+            // --- B. SYNC REDIS ---
+            if ($redis) {
+                $redis->del('liste_manuscrits');
+            }
+
+            header('Location: app.php');
             exit;
         } else {
             $message = "Erreur lors de l'ajout.";
@@ -37,7 +52,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Affichage du template
 try {
     echo $twig->render('create.html.twig', ['message' => $message]);
 } catch (LoaderError|RuntimeError|SyntaxError $e) {

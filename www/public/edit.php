@@ -9,24 +9,23 @@ use Twig\Error\SyntaxError;
 
 $twig = getTwig();
 $manager = getMongoDbManager();
+$redis = getRedisClient();
+$es = getElasticSearchClient(); // <--- Client ES
 
 $id = $_GET['id'] ?? null;
 $message = null;
 
-// Vérification de l'ID
 if (!$id) {
-    header('Location: index.php');
+    header('Location: app.php');
     exit;
 }
 
-// Récupération du document existant pour pré-remplir le formulaire
 try {
     $document = $manager->tp->findOne(['_id' => new ObjectId($id)]);
 } catch (Exception $e) {
     die("ID invalide");
 }
 
-// Traitement du formulaire de mise à jour
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = [
         'cote' => $_POST['cote'],
@@ -36,24 +35,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ];
 
     try {
-        // Mise à jour avec updateOne
-        // $set permet de ne modifier que les champs spécifiés
+        // Update MongoDB
         $manager->tp->updateOne(
             ['_id' => new ObjectId($id)],
             ['$set' => $data]
         );
 
-        // Redirection vers la liste après succès
-        header('Location: index.php');
+        // --- A. SYNC ELASTICSEARCH ---
+        // On écrase les infos dans ElasticSearch avec les nouvelles
+        if ($es) {
+            $es->index([
+                'index' => 'bibliotheque',
+                'id'    => $id,
+                'body'  => $data
+            ]);
+        }
+
+        // --- B. SYNC REDIS ---
+        if ($redis) {
+            $redis->del('liste_manuscrits');
+        }
+
+        header('Location: app.php');
         exit;
     } catch (Exception $e) {
         $message = "Erreur lors de la modification : " . $e->getMessage();
     }
 }
 
-// Affichage du template
 try {
-    echo $twig->render('update.html.twig', [
+    echo $twig->render('edit.html.twig', [
         'document' => $document,
         'message' => $message
     ]);
