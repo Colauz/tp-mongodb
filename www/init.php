@@ -9,6 +9,7 @@ require_once __DIR__.'/vendor/autoload.php';
 use MongoDB\Database;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
+use Elastic\Elasticsearch\ClientBuilder;
 
 // env configuration
 (Dotenv\Dotenv::createImmutable(__DIR__))->load();
@@ -37,6 +38,16 @@ function getRedisClient() {
             'host'   => $_ENV['REDIS_HOST'],
             'port'   => $_ENV['REDIS_PORT'],
         ]);
+    } catch (Exception $e) {
+        return null;
+    }
+}
+
+function getElasticSearchClient() {
+    try {
+        return ClientBuilder::create()
+            ->setHosts([$_ENV['ELASTIC_HOST'] . ':' . $_ENV['ELASTIC_PORT']])
+            ->build();
     } catch (Exception $e) {
         return null;
     }

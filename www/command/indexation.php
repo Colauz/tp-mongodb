@@ -1,10 +1,35 @@
 <?php
 
-include_once __DIR__.'/../init.php';
+require_once __DIR__ . '/../init.php';
 
+$mongo = getMongoDbManager();
+$es = getElasticSearchClient();
 
-echo "\nFichier à compléter pour indexer dans ElasticSearch les documents\n";
+echo "Début de l'indexation...\n";
 
+$collection = $mongo->tp;
+$cursor = $collection->find([]);
 
+foreach ($cursor as $document) {
+    $id = (string)$document->_id;
 
-return 1;
+    $params = [
+        'index' => 'bibliotheque',
+        'id'    => $id,
+        'body'  => [
+            'titre'  => $document->titre ?? 'Sans titre',
+            'auteur' => $document->auteur ?? 'Inconnu',
+            'cote'   => $document->cote ?? '',
+            'siecle' => $document->siecle ?? ''
+        ]
+    ];
+
+    try {
+        $es->index($params);
+        echo "Livre indexé : " . ($document->titre ?? 'N/A') . "\n";
+    } catch (Exception $e) {
+        echo "Erreur sur le livre $id : " . $e->getMessage() . "\n";
+    }
+}
+
+echo "Indexation terminée !\n";

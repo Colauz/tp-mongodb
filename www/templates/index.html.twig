@@ -5,11 +5,26 @@
 {% block content %}
     <h1>Liste des manuscrits de la bibliothèque du Patrimoine de Clermont Auvergne Métropole</h1>
 
+    {# --- FORMULAIRE DE RECHERCHE (Nouveau pour le TP 3) --- #}
+    <div class="card mb-4 bg-light">
+        <div class="card-body">
+            <form method="GET" action="app.php" class="d-flex gap-2">
+                <input class="form-control" type="search" name="q" placeholder="Rechercher un titre, un auteur..." value="{{ search_query|default('') }}">
+                <button class="btn btn-primary" type="submit">Rechercher</button>
+                {% if search_query %}
+                    <a href="app.php" class="btn btn-outline-secondary">Effacer</a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    {# --- Bouton d'ajout --- #}
     <div class="mb-3">
         <a href="create.php" class="btn btn-success">Ajouter un manuscrit</a>
     </div>
 
-    <table class="table">
+    {# --- Tableau des résultats --- #}
+    <table class="table table-striped table-hover">
         <thead>
         <tr>
             <th>Référence</th>
@@ -26,14 +41,21 @@
                 <td>{{ document.auteur|default('Anonyme') }}</td>
 
                 <td>
-                    <a href="get.php?id={{ document._id }}">voir</a>&nbsp;/&nbsp;
-                    <a href="edit.php?id={{ document._id }}">éditer</a>&nbsp;/&nbsp;
-                    <a href="delete.php?id={{ document._id }}">supprimer</a>
+                    {# Utilisation de l'ID MongoDB pour les liens #}
+                    <a href="get.php?id={{ document._id }}" class="btn btn-sm btn-info">Voir</a>
+                    <a href="edit.php?id={{ document._id }}" class="btn btn-sm btn-warning">Éditer</a>
+                    <a href="delete.php?id={{ document._id }}" class="btn btn-sm btn-danger" onclick="return confirm('Êtes-vous sûr ?')">Supprimer</a>
                 </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="4">Aucun document trouvé dans la base.</td>
+                <td colspan="4" class="text-center">
+                    {% if search_query %}
+                        Aucun résultat trouvé pour "<strong>{{ search_query }}</strong>".
+                    {% else %}
+                        Aucun document dans la base.
+                    {% endif %}
+                </td>
             </tr>
         {% endfor %}
         </tbody>

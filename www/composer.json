@@ -3,7 +3,8 @@
         "mongodb/mongodb": "^1.5",
         "twig/twig": "^3.5",
         "vlucas/phpdotenv": "^5.5",
-        "predis/predis": "^3.3"
+        "predis/predis": "^3.3",
+        "elasticsearch/elasticsearch": "^8.0"
     },
     "config": {
         "platform": {
